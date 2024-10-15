@@ -1,3 +1,4 @@
 /target
 /src/faust.rs
 /vendor
+.DS_STORE
