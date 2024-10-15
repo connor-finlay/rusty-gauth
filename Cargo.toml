@@ -1,0 +1,17 @@
+[package]
+name = "rusty-gauth"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+base32 = "0.5.1"
+base64 = "0.22.1"
+clap = { version = "4.5.20", features = ["derive"] }
+comfy-table = "7.1.1"
+image = "0.25.2"
+prost = "0.13.3"
+rqrr = "0.8.0"
+urlencoding = "2.1.3"
+
+[build-dependencies]
+prost-build = "0.13.3"
