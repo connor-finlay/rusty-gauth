@@ -1,5 +1,11 @@
 # rusty-gauth
 
+## Usage:
+
+* In Google Authenticator -> Menu -> Transfer Accunts -> Export Accounts
+* Save QR-code to a file and pass the path to `rusty-gauth`
+* Alternatively, extract the link from the QR-code first and pass the link to `rusty-gauth`
+
 ```shell
 A command line tool to decode Google Authenticator export data
 
