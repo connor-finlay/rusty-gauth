@@ -5,8 +5,6 @@ use comfy_table::Table;
 use prost::Message;
 use rqrr;
 
-//mod faust;
-
 include!(concat!(env!("OUT_DIR"), "/googleauth.rs"));
 
 /// A command line tool to decode Google Authenticator export data
@@ -105,7 +103,6 @@ fn main() {
                 let mut cmd = Args::command();
                 let _ = cmd.print_long_help();
                 std::process::exit(0);
-                // faust::faust();
             }
         },
     }
