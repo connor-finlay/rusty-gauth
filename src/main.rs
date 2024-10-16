@@ -1,3 +1,5 @@
+use std::error::Error;
+
 use base32::Alphabet;
 use base64::{engine::general_purpose::STANDARD, Engine as _};
 use clap::{CommandFactory, Parser};
@@ -49,12 +51,21 @@ fn digits_count_string(digit_count: i32) -> String {
     }
 }
 
-fn get_qrcode_data(path: &str) {
-    let img = image::open(path).expect("Could not open file").to_luma8();
+fn get_qrcode_data(path: &str) -> Result<String, Box<dyn Error>> {
+    let img = match image::open(path) {
+        Ok(img) => img.to_luma8(),
+        Err(e) => return Err(e.into()),
+    };
+
+    //let img = image::open(path)?.to_luma8();
+
     let mut img = rqrr::PreparedImage::prepare(img);
     let grids = img.detect_grids();
-    let (_, content) = grids[0].decode().unwrap();
-    decode_backup(&content);
+    if grids.len() < 1 {
+        return Err("No QR codes detected in image".into());
+    }
+    let (_, content) = grids[0].decode()?; //.unwrap();
+    Ok(content)
 }
 
 fn decode_backup(link: &str) {
@@ -92,18 +103,21 @@ fn decode_backup(link: &str) {
     println!("{table}");
 }
 
-fn main() {
+fn main() -> Result<(), Box<dyn Error>> {
     let args = Args::parse();
 
     match args.link {
         Some(link) => decode_backup(&link),
         None => match args.path {
-            Some(path) => get_qrcode_data(&path),
+            Some(path) => match get_qrcode_data(&path) {
+                Ok(link) => decode_backup(&link),
+                Err(e) => return Err(e.into()),
+            },
             None => {
                 let mut cmd = Args::command();
-                let _ = cmd.print_long_help();
-                std::process::exit(0);
+                let _ = cmd.print_long_help()?;
             }
         },
     }
+    Ok(())
 }
