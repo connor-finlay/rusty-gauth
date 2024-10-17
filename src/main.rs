@@ -1,10 +1,10 @@
+use anyhow::{bail, Result};
 use base32::Alphabet;
 use base64::{engine::general_purpose::STANDARD, Engine as _};
 use clap::{CommandFactory, Parser};
 use comfy_table::Table;
 use prost::Message;
 use rqrr;
-use std::error::Error;
 
 include!(concat!(env!("OUT_DIR"), "/googleauth.rs"));
 
@@ -50,25 +50,25 @@ fn digits_count_string(digit_count: i32) -> String {
     }
 }
 
-fn get_qrcode_data(path: &str) -> Result<String, Box<dyn Error>> {
+fn get_qrcode_data(path: &str) -> Result<String> {
     let img = match image::open(path) {
         Ok(img) => img.to_luma8(),
-        Err(e) => return Err(e.into()),
+        Err(e) => bail!(e),
     };
 
     let mut img = rqrr::PreparedImage::prepare(img);
     let grids = img.detect_grids();
     if grids.len() < 1 {
-        return Err("No QR codes detected in image. Try a decoding the QR code yourself and providing the link.".into());
+        bail!("No QR codes detected in image. Try a decoding the QR code yourself and providing the link.");
     }
     let (_, content) = grids[0].decode()?;
     Ok(content)
 }
 
-fn decode_backup(link: &str) -> Result<Table, Box<dyn Error>> {
+fn decode_backup(link: &str) -> Result<Table> {
     let split = match link.strip_prefix("otpauth-migration://offline?data=") {
         Some(split) => split,
-        None => return Err("Link does not contain valid migration data".into()),
+        None => bail!("Link does not contain valid migration data"),
     };
 
     let uri_decoded = urlencoding::decode(&split)?;
@@ -98,7 +98,7 @@ fn decode_backup(link: &str) -> Result<Table, Box<dyn Error>> {
     Ok(table)
 }
 
-fn main() -> Result<(), Box<dyn Error>> {
+fn main() -> Result<()> {
     let args = Args::parse();
 
     match (args.link, args.path) {
